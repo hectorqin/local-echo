@@ -1,0 +1,991 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta http-equiv="Content-Type" content="text/html;charset=utf-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=0">
+    <title>Terminal</title>
+    <style>
+        /* http://meyerweb.com/eric/tools/css/reset/
+   v2.0 | 20110126
+   License: none (public domain)
+*/
+
+        html,
+        body,
+        div,
+        span,
+        applet,
+        object,
+        iframe,
+        h1,
+        h2,
+        h3,
+        h4,
+        h5,
+        h6,
+        p,
+        blockquote,
+        pre,
+        a,
+        abbr,
+        acronym,
+        address,
+        big,
+        cite,
+        code,
+        del,
+        dfn,
+        em,
+        img,
+        ins,
+        kbd,
+        q,
+        s,
+        samp,
+        small,
+        strike,
+        strong,
+        sub,
+        sup,
+        tt,
+        var,
+        b,
+        u,
+        i,
+        center,
+        dl,
+        dt,
+        dd,
+        ol,
+        ul,
+        li,
+        fieldset,
+        form,
+        label,
+        legend,
+        table,
+        caption,
+        tbody,
+        tfoot,
+        thead,
+        tr,
+        th,
+        td,
+        article,
+        aside,
+        canvas,
+        details,
+        embed,
+        figure,
+        figcaption,
+        footer,
+        header,
+        hgroup,
+        menu,
+        nav,
+        output,
+        ruby,
+        section,
+        summary,
+        time,
+        mark,
+        audio,
+        video {
+            margin: 0;
+            padding: 0;
+            border: 0;
+            font-size: 100%;
+            font: inherit;
+            vertical-align: baseline;
+        }
+
+        /* HTML5 display-role reset for older browsers */
+        article,
+        aside,
+        details,
+        figcaption,
+        figure,
+        footer,
+        header,
+        hgroup,
+        menu,
+        nav,
+        section {
+            display: block;
+        }
+
+        body {
+            line-height: 1;
+        }
+
+        ol,
+        ul {
+            list-style: none;
+        }
+
+        blockquote,
+        q {
+            quotes: none;
+        }
+
+        blockquote:before,
+        blockquote:after,
+        q:before,
+        q:after {
+            content: '';
+            content: none;
+        }
+
+        table {
+            border-collapse: collapse;
+            border-spacing: 0;
+        }
+
+        body {
+            background-color: #000;
+        }
+
+        #container-box {
+            width: 100vw;
+            /* height: 100vh; */
+            display: flex;
+            flex-direction: column;
+        }
+
+        #container {
+            /* position: absolute; */
+            /* top: 0; */
+            /* left: 0; */
+            /* right: 0; */
+            /* bottom: 44px; */
+            /* width: 100vw; */
+            /* height: 100vh; */
+            /* border: 1px solid grey; */
+            flex: 1 0;
+            max-height: calc(100% - 45px);
+        }
+
+        .toolbar-placeholder {
+            height: 45px;
+            flex: 0 0;
+        }
+
+        .custom-context-menu-container {
+            width: 80vw;
+            max-width: 595px;
+            background-color: #444;
+            color: #fff;
+            display: flex;
+            /* flex-wrap: nowrap; */
+        }
+
+        .custom-context-menu {
+            flex: 1 1 1;
+            overflow-x: auto;
+            display: flex;
+            flex-direction: row;
+            /* flex-wrap: nowrap; */
+        }
+
+        .custom-context-menu-btn {
+            padding: 15px 18px;
+            border-right: 1px solid #999;
+            font-size: 14px;
+            display: none;
+        }
+
+        .custom-context-menu-btn.right {
+            border-right: none;
+            border-left: 1px solid #999;
+        }
+
+        .custom-context-menu-item {
+            display: inline-block;
+            border-right: 1px solid #999;
+            font-size: 14px;
+            padding: 12px 15px;
+            flex-shrink: 0;
+        }
+
+        #toolbar {
+            position: fixed;
+            bottom: 0;
+            overflow-x: auto;
+            background-color: #444;
+            color: #fff;
+            flex: 1 1 1;
+            display: none;
+            flex-direction: row;
+            max-width: 100vw;
+            user-select: none;
+            -webkit-user-select: none;
+            z-index: 100;
+        }
+
+        #toolbar .toolbar-item {
+            display: inline-block;
+            border-right: 1px solid #999;
+            font-size: 20px;
+            padding: 12px 18px;
+            flex-shrink: 0;
+        }
+        #toolbar .toolbar-item.pressed {
+            background-color: #333;
+        }
+
+        #toast {
+            position: fixed;
+            left: 20px;
+            right: 20px;
+            text-align: center;
+            top: 10px;
+            z-index: 19999;
+            display: none;
+        }
+
+        #toast-text {
+            display: table;
+            margin: 0 auto;
+            border-radius: 4px;
+            color: white;
+            font-size: 14px;
+            padding: 8px;
+            background-color: #333;
+            filter: alpha(opacity=80);
+            opacity: 0.8;
+            -moz-opacity: 0.8;
+            -khtml-opacity: 0.8
+        }
+    </style>
+    <style>
+        /**
+        *  Default styles for xterm.js
+        */
+
+        .xterm {
+            position: relative;
+            user-select: text;
+            /* user-select: none; */
+            /* -ms-user-select: none; */
+            /* -webkit-user-select: none; */
+        }
+
+        .xterm.focus,
+        .xterm:focus {
+            outline: none;
+        }
+
+        .xterm .xterm-helpers {
+            position: absolute;
+            top: 0;
+            /**
+     * The z-index of the helpers must be higher than the canvases in order for
+     * IMEs to appear on top.
+     */
+            z-index: 5;
+        }
+
+        .xterm .xterm-helper-textarea {
+            padding: 0;
+            border: 0;
+            margin: 0;
+            /* Move textarea out of the screen to the far left, so that the cursor is not visible */
+            position: absolute;
+            opacity: 0;
+            left: -9999em;
+            top: 0;
+            width: 0;
+            height: 0;
+            z-index: -5;
+            /** Prevent wrapping so the IME appears against the textarea at the correct position */
+            white-space: nowrap;
+            overflow: hidden;
+            resize: none;
+        }
+
+        .xterm .composition-view {
+            /* TODO: Composition position got messed up somewhere */
+            background: #000;
+            color: #FFF;
+            display: none;
+            position: absolute;
+            white-space: nowrap;
+            z-index: 1;
+        }
+
+        .xterm .composition-view.active {
+            display: block;
+        }
+
+        .xterm .xterm-viewport {
+            /* On OS X this is required in order for the scroll bar to appear fully opaque */
+            background-color: #000;
+            overflow-y: scroll;
+            cursor: default;
+            position: absolute;
+            right: 0;
+            left: 0;
+            top: 0;
+            bottom: 0;
+        }
+
+        .xterm .xterm-screen {
+            position: relative;
+        }
+
+        .xterm .xterm-screen canvas {
+            position: absolute;
+            left: 0;
+            top: 0;
+        }
+
+        .xterm .xterm-scroll-area {
+            visibility: hidden;
+        }
+
+        .xterm-char-measure-element {
+            display: inline-block;
+            visibility: hidden;
+            position: absolute;
+            top: 0;
+            left: -9999em;
+            line-height: normal;
+        }
+
+        .xterm {
+            cursor: text;
+        }
+
+        .xterm.enable-mouse-events {
+            /* When mouse events are enabled (eg. tmux), revert to the standard pointer cursor */
+            cursor: default;
+        }
+
+        .xterm.xterm-cursor-pointer {
+            cursor: pointer;
+        }
+
+        .xterm.column-select.focus {
+            /* Column selection mode */
+            cursor: crosshair;
+        }
+
+        .xterm .xterm-accessibility,
+        .xterm .xterm-message {
+            position: absolute;
+            left: 0;
+            top: 0;
+            bottom: 0;
+            right: 0;
+            z-index: 10;
+            color: transparent;
+        }
+
+        .xterm .live-region {
+            position: absolute;
+            left: -9999px;
+            width: 1px;
+            height: 1px;
+            overflow: hidden;
+        }
+
+        .xterm-dim {
+            opacity: 0.5;
+        }
+
+        .xterm-underline {
+            text-decoration: underline;
+        }
+    </style>
+</head>
+
+<body>
+    <div id="toast"><span id="toast-text">tip</span></div>
+    <div id="container-box">
+        <div id="container"></div>
+        <div class="toolbar-placeholder"></div>
+    </div>
+    <div id="toolbar">
+        <span class="toolbar-item" data-type="tab">T</span>
+        <span class="toolbar-item" data-type="ctrl" id="toolbar-ctrl">C</span>
+        <span class="toolbar-item" data-type="esc">E</span>
+        <span class="toolbar-item" id="toolbar-cursor" data-type="cursor">✚</span>
+        <span class="toolbar-item">"</span>
+        <span class="toolbar-item">'</span>
+        <span class="toolbar-item">;</span>
+        <span class="toolbar-item">.</span>
+        <span class="toolbar-item">-</span>
+        <span class="toolbar-item">&</span>
+        <span class="toolbar-item">|</span>
+        <span class="toolbar-item">^</span>
+        <span class="toolbar-item">$</span>
+        <span class="toolbar-item">\</span>
+    </div>
+    <!-- <script src="libs/clipboard.min.js"></script> -->
+    <script src="libs/xterm.min.js"></script>
+    <script src="libs/socket.io.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/xterm-addon-fit@0.5.0/lib/xterm-addon-fit.min.js"></script>
+    <script src="libs/local-echo.js"></script>
+    <script>
+        const toolbarDom = document.getElementById('toolbar');
+        const cursorDom = document.getElementById('toolbar-cursor');
+
+        var _isPCLast = null;
+
+        function isPC(refresh) {
+            if (_isPCLast === null || refresh) {
+                _isPCLast = !(window.navigator.userAgent.match(
+                    /(iPhone|iPod|Android|ios|iOS|iPad|Backerry|WebOS|Symbian|Windows Phone|Phone)/i));
+            }
+            return _isPCLast
+        }
+
+        const toastDom = document.getElementById('toast')
+        const toastTextDom = document.getElementById('toast-text')
+
+        function showToast(msg) {
+            toastTextDom.innerText = msg;
+            toastDom.style.display = "block";
+            setTimeout(() => {
+                toastDom.style.display = "none";
+            }, 2000);
+        }
+
+        var _isDebug = location.protocol == 'http:'
+
+        function debugLog() {
+            if (_isDebug) {
+                console.log.apply(console, arguments)
+            }
+        }
+
+        const domHelper = {
+            hasClass(ele, className) {
+                return ele.className.indexOf(className) !== -1;
+            },
+            addClass(ele, className) {
+                if (!this.hasClass(ele, className)) {
+                    ele.className = ele.className + " " + className;
+                }
+            },
+            removeClass(ele, className) {
+                if (this.hasClass(ele, className)) {
+                    ele.className = ele.className.replace(className, "");
+                }
+            }
+        }
+
+        function notifyRN(event, data, id) {
+            if (window.ReactNativeWebView && window.ReactNativeWebView.postMessage) {
+                window.ReactNativeWebView.postMessage(JSON.stringify({
+                    id: id,
+                    event: event,
+                    data: data
+                }));
+            } else {
+                debugLog({
+                    id: id,
+                    event: event,
+                    data: data
+                });
+                if (window.self !== window.top) {
+                    window.top.postMessage(JSON.stringify({
+                        id: id,
+                        event: event,
+                        data: data
+                    }), '*');
+                }
+            }
+        }
+
+        window.nativeCallback = {};
+
+        function callRN(event, data, callback) {
+            const id = new Date().getTime();
+            window.nativeCallback[id] = callback;
+            notifyRN(event, data, id);
+        }
+
+        const containerBox = document.getElementById('container-box');
+        window.addEventListener('resize', function (event) {
+            fitAddon.fit();
+            if (isPC(true)) {
+                toolbarDom.style.display = "none";
+            } else {
+                toolbarDom.style.display = "flex";
+            }
+            containerBox.style.height = window.innerHeight + 'px';
+            fitAddon.fit();
+            // term.buffer._core.viewport._viewportElement.style.height = window.innerHeight
+        });
+        containerBox.style.height = window.innerHeight + 'px';
+
+        showToast('innerHeight: ' + window.innerHeight + ' viheight: ' + window.visualViewport.height);
+
+        if (window.visualViewport) {
+            window.visualViewport.addEventListener('resize', function () {
+                showToast('innerHeight: ' + window.innerHeight + ' viheight: ' + window.visualViewport.height);
+                toolbarDom.style.bottom = (window.innerHeight - window.visualViewport.height) + 'px'
+                containerBox.style.height = window.visualViewport.height + 'px';
+                fitAddon.fit();
+                // showToast(toolbarDom.style.bottom);
+            })
+        }
+
+        window.termApi = {
+            _term: window.term,
+            paste() {
+                return window.editor._modelData.viewModel.paste.apply(window.editor._modelData.viewModel,
+                arguments);
+            },
+            getDomNodePagePosition(domNode) {
+                let bb = domNode.getBoundingClientRect();
+                return {
+                    left: bb.left + this.getScrollX(),
+                    top: bb.top + this.getScrollY(),
+                    width: bb.width,
+                    height: bb.height
+                };
+            },
+            getScrollX() {
+                if (typeof window.scrollX === 'number') {
+                    // modern browsers
+                    return window.scrollX;
+                } else {
+                    return document.body.scrollLeft + document.documentElement.scrollLeft;
+                }
+            },
+            getScrollY() {
+                if (typeof window.scrollY === 'number') {
+                    // modern browsers
+                    return window.scrollY;
+                } else {
+                    return document.body.scrollTop + document.documentElement.scrollTop;
+                }
+            },
+            trigger(keyboardEventInit, type) {
+                const newEv = new KeyboardEvent(type || 'keydown', keyboardEventInit);
+                console.log("trigger", newEv);
+                term.buffer._core._keyDown(newEv);
+            }
+        };
+
+
+        // 节流
+        function throttle(func, timeout) {
+            var lock = false;
+            return function () {
+                if (lock) return;
+                lock = true;
+                setTimeout(function () {
+                    lock = false;
+                }, timeout);
+                return func.apply(this, arguments);
+            };
+        }
+
+        // 防抖
+        function debounce(func) {
+            var timeout = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : 100;
+            var timer = null;
+            return function () {
+                var _this = this;
+
+                for (var _len = arguments.length, args = new Array(_len), _key = 0; _key < _len; _key++) {
+                    args[_key] = arguments[_key];
+                }
+
+                timer && clearTimeout(timer);
+                timer = setTimeout(function () {
+                    func.apply(_this, args);
+                }, timeout);
+            };
+        }
+
+        const listenFromRN = function (event) {
+            notifyRN('received', {
+                data: event.data
+            })
+            var data = typeof event.data === 'string' ? JSON.parse(event.data) : event.data;
+
+            if (!data) {
+                return;
+            }
+
+            if (data.action === 'resize') {
+                fitAddon.fit();
+            } else if (data.action === 'updateOptions') {
+                for (const key in data.options) {
+                    if (Object.hasOwnProperty.call(data.options, key)) {
+                        const option = data.options[key];
+                        term.setOption(key, option);
+                    }
+                }
+            } else if (data.action === 'execute') {
+                eval(data.script);
+            } else if (data.id) {
+                if (window.nativeCallback[data.id]) {
+                    window.nativeCallback[data.id](data);
+                    delete window.nativeCallback[data.id]
+                }
+            }
+        }
+
+        window.document.addEventListener('message', listenFromRN);
+        window.addEventListener('message', listenFromRN);
+
+        notifyRN('inited');
+
+        window.onerror = function () {
+            showToast(JSON.stringify(arguments))
+        }
+
+        if (!isPC()) {
+            toolbarDom.style.display = "flex";
+        }
+
+        function observer (originalData) {
+            let newData = {};
+            newData.observer = {};
+            newData.$data = {};
+            for (var key in originalData) {
+                (function (key) {
+                    newData.$data[key] = originalData[key];
+                    Object.defineProperty(newData, key, {
+                        set: function (val) {
+                            const oldVal = newData.$data[key]
+                            newData.$data[key] = val;
+                            this.dispatch(key, val, oldVal);
+                        },
+                        get: function () {
+                            return newData.$data[key];
+                        }
+                    });
+                    newData.observer[key] = [];
+                })(key);
+            }
+            newData.on = function (key, callback) {
+                newData.observer[key].push(callback);
+            };
+            newData.dispatch = function (key, val, oldVal) {
+                for (var i in newData.observer[key]) {
+                    newData.observer[key][i](val, oldVal);
+                }
+            };
+            return newData;
+        }
+
+        const appData = observer({
+            ctrlPressed: false,
+            cursorPressed: false,
+            toolBarItemPressed: -1,
+            ignoreNextKeyPress: false,
+            PWD: "~",
+        })
+
+        Object.defineProperty(appData, 'PS1', {
+            get() {
+                return appData.PWD + "$ ";
+            }
+        })
+
+        const ctrlToolDom = document.getElementById('toolbar-ctrl');
+        appData.on('ctrlPressed', function(pressed) {
+            if (pressed) {
+                domHelper.addClass(ctrlToolDom, 'pressed');
+            } else {
+                domHelper.removeClass(ctrlToolDom, 'pressed');
+            }
+        });
+        appData.on('cursorPressed', function(pressed) {
+            if (pressed) {
+                domHelper.addClass(cursorDom, 'pressed');
+            } else {
+                domHelper.removeClass(cursorDom, 'pressed');
+            }
+        });
+        const items = Array.from(document.querySelectorAll(".toolbar-item"));
+        appData.on('toolBarItemPressed', function(pressed, oldVal) {
+            if (pressed !== -1) {
+                domHelper.addClass(items[pressed], 'pressed');
+            }
+            if (oldVal !== -1) {
+                domHelper.removeClass(items[oldVal], 'pressed');
+            }
+        });
+
+        toolbarDom.addEventListener('click', function (e) {
+            if (!e.target) {
+                return;
+            }
+            let showPressed = function() {
+                appData.toolBarItemPressed = items.indexOf(e.target);
+                setTimeout(() => {
+                    appData.toolBarItemPressed = -1;
+                }, 100);
+            };
+            if (e.target.dataset && typeof e.target.dataset["type"] !== 'undefined') {
+                let focus = true;
+                switch (e.target.dataset["type"]) {
+                    case 'tab':
+                        termApi.trigger({
+                            code: "Tab",
+                            key: "Tab",
+                            keyCode: 9,
+                        });
+                        showPressed();
+                        term.focus();
+                        break;
+                    case 'esc':
+                        termApi.trigger({
+                            code: "Escape",
+                            key: "Escape",
+                            keyCode: 27,
+                        });
+                        showPressed();
+                        term.focus();
+                        break;
+                    case 'ctrl':
+                        appData.ctrlPressed = !appData.ctrlPressed
+                        term.focus();
+                        break;
+                    default:
+                        break;
+                }
+                return;
+            }
+            showPressed();
+            if (e.target.tagName.toLowerCase() === 'span') {
+                if (TERM_STATE === PROMPTING) {
+                    const content = localEcho.getInput() + e.target.innerText
+                    localEcho.setInput(content);
+                    localEcho.setCursor(content.length);
+                    term.focus();
+                }
+            }
+        })
+
+        function initToolbarCursor() {
+            var startPoint;
+            var cursorDirection;
+            var cursorTimer;
+            var moveStep = 1;
+            const stepDistance = 80;
+            cursorDom.addEventListener('touchstart', function (event) {
+                if (!event.touches) {
+                    return;
+                }
+                appData.cursorPressed = true;
+                startPoint = {
+                    x: event.touches[0].clientX,
+                    y: event.touches[0].clientY
+                }
+                if (cursorTimer) {
+                    clearInterval(cursorTimer);
+                }
+                cursorTimer = setInterval(() => {
+                    if (cursorDirection && TERM_STATE === PROMPTING) {
+                        for (let i = 0; i < moveStep; i++) {
+                            switch (cursorDirection) {
+                                case 'cursorLeft':
+                                    localEcho.handleCursorMove(-1);
+                                    break;
+                                case 'cursorRight':
+                                    localEcho.handleCursorMove(1);
+                                    break;
+                                case 'cursorUp':
+                                    localEcho.previousCommand();
+                                    break;
+                                case 'cursorDown':
+                                    localEcho.nextCommand();
+                                    break;
+                                default:
+                                    break;
+                            }
+                        }
+                    }
+                }, 150);
+            });
+            cursorDom.addEventListener('touchmove', function (event) {
+                cursorDirection = '';
+                if (!event.touches) {
+                    return;
+                }
+                var delta = {
+                    x: event.touches[0].clientX - startPoint.x,
+                    y: event.touches[0].clientY - startPoint.y
+                }
+                if (Math.abs(delta.x) > Math.abs(delta.y)) {
+                    // 横向
+                    if (delta.x >= 10) {
+                        // 右移
+                        cursorDirection = 'cursorRight';
+                    } else if (delta.x <= -10) {
+                        // 左移
+                        cursorDirection = 'cursorLeft';
+                    }
+                    moveStep = Math.round(Math.abs(delta.x) / stepDistance);
+                } else {
+                    // 纵向
+                    if (delta.y >= 10) {
+                        // 下移
+                        cursorDirection = 'cursorDown';
+                    } else if (delta.y <= -10) {
+                        // 上移
+                        cursorDirection = 'cursorUp';
+                    }
+                    moveStep = Math.round(Math.abs(delta.y) / stepDistance);
+                }
+                event.preventDefault();
+                event.stopPropagation();
+            })
+            cursorDom.addEventListener('touchend', function (event) {
+                appData.cursorPressed = false;
+                if (cursorTimer) {
+                    clearInterval(cursorTimer);
+                }
+            })
+        }
+
+        initToolbarCursor();
+
+        // Start an xterm.js instance
+        const term = new Terminal({
+            rendererType: 'dom',
+            // cancelEvents: false,
+        });
+
+        term.attachCustomKeyEventHandler(function(event) {
+            console.log(event);
+            if (appData.ignoreNextKeyPress && event.type === 'keypress') {
+                // keydown 忽略之后，会触发一次 keypress 的回调，继续忽略
+                appData.ignoreNextKeyPress = false;
+                return false;
+            }
+            if (event.type === 'keydown' && appData.ctrlPressed) {
+                appData.ctrlPressed = false;
+                appData.ignoreNextKeyPress = true;
+                const newEv = new KeyboardEvent('keydown', {
+                    key: event.key,
+                    keyCode: event.keyCode,
+                    code: event.code,
+                    location: event.location,
+                    ctrlKey: true,
+                    composed: true
+                });
+                term.buffer._core._keyDown(newEv);
+                return false;
+            }
+
+            return true;
+        });
+
+        const fitAddon = new FitAddon.FitAddon();
+        term.loadAddon(fitAddon);
+
+        term.open(document.getElementById('container'));
+        fitAddon.fit();
+        // iOS Safari 当输入框弹起时，页面的滚动是系统自身的滚动，此处禁止掉
+        term.element.addEventListener('touchmove', function(ev) {
+            ev.stopPropagation();
+            ev.stopImmediatePropagation();
+            ev.preventDefault();
+            term.buffer._core.viewport.onTouchMove(ev);
+        }, {capture: true, passive: false});
+
+        term.onData(function(data) {
+            if (data.length > 3) {
+                return;
+            }
+            switch (data) {
+                case "\x03": // CTRL+C
+                    if (TERM_STATE !== PROMPTING) {
+                        socket.emit('stopCommand');
+                    }
+                    break;
+            }
+        });
+
+        // Create a local echo controller (xterm.js >=v4)
+        const localEcho = new LocalEchoController();
+        term.loadAddon(localEcho);
+
+        const PROMPTING = 1;
+        const EXECUTING = 2;
+        let TERM_STATE = PROMPTING;
+        function readCommand(callback, prompt, ignoreState) {
+            if (!ignoreState) {
+                TERM_STATE = PROMPTING;
+            }
+            localEcho.read(prompt || appData.PS1)
+                .then(input => {
+                    if (!ignoreState) {
+                        TERM_STATE = EXECUTING;
+                    }
+                    callback && callback(input, function(isEnd) {
+                        return readCommand(callback, prompt)
+                    })
+                })
+                .catch(error => alert(`Error reading: ${error}`));
+        }
+
+        let socket;
+        function initServer() {
+            socket = io("ws://" + location.hostname + ":9981");
+
+            socket.on("connect", () => {
+                // either with send()
+                // socket.send("Hello!");
+
+                // or with emit() and custom event names
+                // socket.emit("salutations", "Hello!", { "mr": "john" }, Uint8Array.from([1, 2, 3, 4]));
+            });
+
+            // handle the event sent with socket.send()
+            socket.on("output", output => {
+                if (output) {
+                    localEcho.println(output);
+                }
+            });
+
+            socket.on("input", (prompt, cb) => {
+                readCommand(function(data) {
+                    cb(data);
+                }, prompt, true);
+            });
+
+            socket.on("stopCommand", () => {
+                localEcho.println("");
+                interactive();
+            });
+        }
+
+        initServer();
+
+        function interactive() {
+            readCommand(function(command, compelete) {
+                // localEcho.println(`Running ${command} ...`)
+                // setTimeout(function() {
+                    // compelete();
+                // }, 300);
+                if (!command) {
+                    compelete();
+                    return;
+                }
+                socket.emit('command', command, function(output) {
+                    if (output) {
+                        localEcho.println(output);
+                    }
+                    compelete();
+                });
+            });
+        }
+
+        interactive();
+    </script>
+</body>
+
+</html>
