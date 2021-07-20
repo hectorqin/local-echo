@@ -859,7 +859,7 @@
         });
 
         term.attachCustomKeyEventHandler(function(event) {
-            console.log(event);
+            // console.log(event);
             if (appData.ignoreNextKeyPress && event.type === 'keypress') {
                 // keydown 忽略之后，会触发一次 keypress 的回调，继续忽略
                 appData.ignoreNextKeyPress = false;

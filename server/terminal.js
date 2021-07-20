@@ -158,7 +158,7 @@ function initTerminal(server)
         client.on('command', async (data, cb) => {
             try {
                 const parsed = parseArgsStringToArgv(data);
-                console.log(parsed)
+                console.log('[command]', parsed);
                 if (!commandList[parsed[0]]) {
                     cb("command " + data + " not found");
                     return;
